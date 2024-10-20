@@ -36,9 +36,26 @@ userSchema.pre("save",async function (next) {
         next(error);
     }
 })
+
+userSchema.methods.comparePassword=async function(password){
+         return bcrypt.compare(password , this.password);
+}
 //json web token
 userSchema.methods.generateToken=async function(){
-    
+    try {
+
+        return jwt.sign({
+          userId: this._id.toString(),
+          email: this.email,
+          isAdmin: this.isAdmin
+        },
+        process.env.JWT_SECTECT_KEY,{
+            expiresIn: "30d",
+        }
+    );
+    } catch (error) {
+        console.error(error);
+    }
 };
 //define the model or collection name
 const user=new mongoose.model('User',userSchema);
